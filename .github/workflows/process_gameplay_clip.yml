@@ -38,7 +38,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Debug: Check script file and permission
+    - name: Debug Check script file and permission
       run: |
         ls -l process_gameplay_clip.py
         echo "Starting the Python script..."
