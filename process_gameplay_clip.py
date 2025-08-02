@@ -266,3 +266,29 @@ def trim_video_for_short(
             end_clip.close()
         if 'final_video' in locals() and final_video is not None:
             final_video.close()
+
+if __name__ == "__main__":
+    # Ceci est un exemple. Vous devez remplacer 'votre_video.mp4' et les données
+    # du dictionnaire par les valeurs réelles de votre test.
+    input_video_path = "video.mp4"
+    output_directory = "output_test"
+
+    # Assurez-vous que le dossier de sortie existe
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+
+    output_video_path = os.path.join(output_directory, "short_gameplay_test.mp4")
+
+    # Données fictives pour le test
+    test_clip_data = {
+        'title': 'Test de montage de clip avec MoviePy',
+        'broadcaster_name': 'Anyme023',
+        'game_name': 'Valorant' # ou un nom de jeu pour tester l'autre mode
+    }
+
+    # Appel de la fonction de traitement vidéo
+    trim_video_for_short(
+        input_path=input_video_path,
+        output_path=output_video_path,
+        clip_data=test_clip_data
+    )
