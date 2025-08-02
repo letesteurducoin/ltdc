@@ -135,26 +135,45 @@ def trim_video_for_short(
             gameplay_section_height = target_height - webcam_section_height
 
             # 1. Préparer le clip de la webcam (haut)
-            webcam_clip_original = crop(
-                clip, 
-                x1=WEBCAM_COORDS['x1'], 
-                y1=WEBCAM_COORDS['y1'], 
-                x2=WEBCAM_COORDS['x2'], 
-                y2=WEBCAM_COORDS['y2']
-            )
-            webcam_clip_resized = moviepy_resize(webcam_clip_original, newsize=(target_width, webcam_section_height))
-            all_video_elements.append(webcam_clip_resized.set_position(("center", "top")))
+            try:
+                webcam_clip_original = crop(
+                    clip, 
+                    x1=WEBCAM_COORDS['x1'], 
+                    y1=WEBCAM_COORDS['y1'], 
+                    x2=WEBCAM_COORDS['x2'], 
+                    y2=WEBCAM_COORDS['y2']
+                )
+                webcam_clip_resized = moviepy_resize(webcam_clip_original, newsize=(target_width, webcam_section_height))
+                if webcam_clip_resized:
+                    print(f"✅ Clip webcam créé : {webcam_clip_resized.size[0]}x{webcam_clip_resized.size[1]}")
+                    all_video_elements.append(webcam_clip_resized.set_position(("center", "top")))
+                else:
+                    raise ValueError("Le clip webcam a retourné une valeur invalide (None).")
+            except Exception as e:
+                print(f"❌ Erreur lors du traitement du clip webcam : {e}")
+                # Gérer l'échec du clip webcam en utilisant un clip noir
+                all_video_elements.append(ColorClip(size=(target_width, webcam_section_height), color=(0,0,0)).set_duration(duration).set_position(("center", "top")))
+                print("⚠️ Un clip noir a été utilisé pour remplacer la webcam.")
 
             # 2. Préparer le clip du gameplay (bas)
-            gameplay_clip_original_zoomed = moviepy_resize(clip, newsize=(None, gameplay_section_height))
-            gameplay_clip_final = crop(
-                gameplay_clip_original_zoomed,
-                width=target_width,
-                height=gameplay_section_height,
-                x_center='center'
-            )
-            all_video_elements.append(gameplay_clip_final.set_position(("center", webcam_section_height)))
-
+            try:
+                gameplay_clip_original_zoomed = moviepy_resize(clip, newsize=(None, gameplay_section_height))
+                gameplay_clip_final = crop(
+                    gameplay_clip_original_zoomed,
+                    width=target_width,
+                    height=gameplay_section_height,
+                    x_center='center'
+                )
+                if gameplay_clip_final:
+                    print(f"✅ Clip gameplay créé : {gameplay_clip_final.size[0]}x{gameplay_clip_final.size[1]}")
+                    all_video_elements.append(gameplay_clip_final.set_position(("center", webcam_section_height)))
+                else:
+                    raise ValueError("Le clip gameplay a retourné une valeur invalide (None).")
+            except Exception as e:
+                print(f"❌ Erreur lors du traitement du clip gameplay : {e}")
+                # Gérer l'échec du clip gameplay en utilisant un clip noir
+                all_video_elements.append(ColorClip(size=(target_width, gameplay_section_height), color=(0,0,0)).set_duration(duration).set_position(("center", webcam_section_height)))
+                print("⚠️ Un clip noir a été utilisé pour remplacer le gameplay.")
 
         # --- Fin du traitement de la vidéo principale ---
 
