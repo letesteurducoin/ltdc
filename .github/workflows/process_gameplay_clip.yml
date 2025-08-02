@@ -25,11 +25,11 @@ jobs:
       run: |
         POLICY_FILE="/etc/ImageMagick-6/policy.xml"
         
-        sudo cp $POLICY_FILE ${POLICY_FILE}.bak
+        sudo cp "$POLICY_FILE" "${POLICY_FILE}.bak"
         
-        sudo sed -i 's#<policy domain="\([^"]*\)" rights="none" pattern="\([^"]*\)"\/>#<policy domain="\1" rights="read|write" pattern="\2"\/>#g' $POLICY_FILE
+        sudo sed -i 's#<policy domain="\([^"]*\)" rights="none" pattern="\([^"]*\)"\/>#<policy domain="\1" rights="read|write" pattern="\2"\/>#g' "$POLICY_FILE"
         
-        sudo sed -i '/<policy domain="coder" rights="none" pattern="[^"]*"\/>/d' $POLICY_FILE
+        sudo sed -i '/<policy domain="coder" rights="none" pattern="[^"]*"\/>/d' "$POLICY_FILE"
         
         echo "ImageMagick policy updated."
 
