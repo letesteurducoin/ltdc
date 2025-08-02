@@ -171,9 +171,9 @@ def trim_video_for_short(
         # --- Ligne corrigée : Gérer l'échec de création du TextClip ---
         try:
             title_clip = TextClip(title_text, fontsize=70, color=text_color,
-                                  font=font_path_bold, stroke_color=stroke_color, stroke_width=stroke_width,
-                                  size=(target_width * 0.9, None),
-                                  method='caption') \
+                                    font=font_path_bold, stroke_color=stroke_color, stroke_width=stroke_width,
+                                    size=(target_width * 0.9, None),
+                                    method='caption') \
                          .set_duration(duration) \
                          .set_position(("center", int(target_height * 0.08)))
         except Exception as e:
@@ -183,9 +183,9 @@ def trim_video_for_short(
         stroke_width = 0.5
         try:
             streamer_clip = TextClip(f"@{streamer_name}", fontsize=40, color=text_color,
-                                     font=font_path_regular, stroke_color=stroke_color, stroke_width=stroke_width) \
+                                    font=font_path_regular, stroke_color=stroke_color, stroke_width=stroke_width) \
                             .set_duration(duration) \
-                            .set_position(("center", int(target_height * 0.85) - 40)) 
+                            .set_position(("center", int(target_height * 0.85) - 40))
         except Exception as e:
             print(f"⚠️ Erreur lors de la création du nom du streamer : {e}. Le nom ne sera pas ajouté.")
             streamer_clip = None
