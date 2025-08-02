@@ -168,7 +168,6 @@ def trim_video_for_short(
         stroke_color = "black"
         stroke_width = 1.5
         
-        # --- Ligne corrigée : Gérer l'échec de création du TextClip ---
         try:
             title_clip = TextClip(title_text, fontsize=70, color=text_color,
                                     font=font_path_bold, stroke_color=stroke_color, stroke_width=stroke_width,
