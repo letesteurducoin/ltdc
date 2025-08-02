@@ -78,11 +78,11 @@ def trim_video_for_short(
 
         # --- DÉFINITION DES CHEMINS DES ASSETS ---
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        assets_dir = os.path.abspath(os.path.join(script_dir, '..', 'assets'))
+        # Le chemin "assets" est un dossier frère du dossier "scripts"
+        assets_dir = os.path.abspath(os.path.join(script_dir, 'assets'))
         twitch_icon_path = os.path.join(assets_dir, 'twitch_icon.png')
         custom_background_image_path = os.path.join(assets_dir, 'fond_short.png')
         end_short_video_path = os.path.join(assets_dir, 'fin_de_short.mp4')
-
         font_path_regular = os.path.join(assets_dir, 'Roboto-Regular.ttf')
         font_path_bold = os.path.join(assets_dir, 'Roboto-Bold.ttf')
 
@@ -117,7 +117,6 @@ def trim_video_for_short(
         all_video_elements.append(background_clip.set_position(("center", "center")))
 
         # --- Traitement de la vidéo principale en fonction de la catégorie ---
-        # --- Ligne corrigée pour gérer le cas où 'game_name' est None. ---
         game_name = clip_data.get("game_name")
         if game_name is None or "just chatting" in game_name.lower() or "juste de causer" in game_name.lower():
             print("⏩ Mode 'Just Chatting' : Zoom sur la vidéo principale.")
@@ -169,37 +168,53 @@ def trim_video_for_short(
         stroke_color = "black"
         stroke_width = 1.5
         
-        title_clip = TextClip(title_text, fontsize=70, color=text_color,
-                              font=font_path_bold, stroke_color=stroke_color, stroke_width=stroke_width,
-                              size=(target_width * 0.9, None),
-                              method='caption') \
-                     .set_duration(duration) \
-                     .set_position(("center", int(target_height * 0.08)))
+        # --- Ligne corrigée : Gérer l'échec de création du TextClip ---
+        try:
+            title_clip = TextClip(title_text, fontsize=70, color=text_color,
+                                  font=font_path_bold, stroke_color=stroke_color, stroke_width=stroke_width,
+                                  size=(target_width * 0.9, None),
+                                  method='caption') \
+                         .set_duration(duration) \
+                         .set_position(("center", int(target_height * 0.08)))
+        except Exception as e:
+            print(f"⚠️ Erreur lors de la création du titre : {e}. Le titre ne sera pas ajouté.")
+            title_clip = None
 
         stroke_width = 0.5
-        streamer_clip = TextClip(f"@{streamer_name}", fontsize=40, color=text_color,
-                                 font=font_path_regular, stroke_color=stroke_color, stroke_width=stroke_width) \
-                        .set_duration(duration) \
-                        .set_position(("center", int(target_height * 0.85) - 40)) 
-        
+        try:
+            streamer_clip = TextClip(f"@{streamer_name}", fontsize=40, color=text_color,
+                                     font=font_path_regular, stroke_color=stroke_color, stroke_width=stroke_width) \
+                            .set_duration(duration) \
+                            .set_position(("center", int(target_height * 0.85) - 40)) 
+        except Exception as e:
+            print(f"⚠️ Erreur lors de la création du nom du streamer : {e}. Le nom ne sera pas ajouté.")
+            streamer_clip = None
+
         twitch_icon_clip = None
         if os.path.exists(twitch_icon_path):
-            try:
-                twitch_icon_clip = ImageClip(twitch_icon_path, duration=duration)
-                twitch_icon_clip = moviepy_resize(twitch_icon_clip, width=80)
-                
-                icon_x = title_clip.pos[0] - twitch_icon_clip.w - 10
-                icon_y = title_clip.pos[1] + (title_clip.h / 2) - (twitch_icon_clip.h / 2)
+            if title_clip: # Vérification si le titre a bien été créé
+                try:
+                    twitch_icon_clip = ImageClip(twitch_icon_path, duration=duration)
+                    twitch_icon_clip = moviepy_resize(twitch_icon_clip, width=80)
+                    
+                    icon_x = title_clip.pos[0] - twitch_icon_clip.w - 10
+                    icon_y = title_clip.pos[1] + (title_clip.h / 2) - (twitch_icon_clip.h / 2)
 
-                twitch_icon_clip = twitch_icon_clip.set_position((icon_x, icon_y))
-                print("✅ Icône Twitch ajoutée.")
-            except Exception as e:
-                print(f"⚠️ Erreur lors du chargement ou du traitement de l'icône Twitch : {e}. L'icône ne sera pas ajoutée.")
-                twitch_icon_clip = None
+                    twitch_icon_clip = twitch_icon_clip.set_position((icon_x, icon_y))
+                    print("✅ Icône Twitch ajoutée.")
+                except Exception as e:
+                    print(f"⚠️ Erreur lors du chargement ou du traitement de l'icône Twitch : {e}. L'icône ne sera pas ajoutée.")
+                    twitch_icon_clip = None
+            else:
+                print("⚠️ Le titre n'a pas pu être créé, l'icône Twitch ne sera pas ajoutée pour éviter les erreurs de positionnement.")
         else:
             print("⚠️ Fichier 'twitch_icon.png' non trouvé dans le dossier 'assets'. L'icône ne sera pas ajoutée.")
 
-        final_elements_main_video = [video_with_visuals, title_clip, streamer_clip]
+        final_elements_main_video = [video_with_visuals]
+        if title_clip:
+            final_elements_main_video.append(title_clip)
+        if streamer_clip:
+            final_elements_main_video.append(streamer_clip)
         if twitch_icon_clip:
             final_elements_main_video.append(twitch_icon_clip)
 
@@ -251,27 +266,3 @@ def trim_video_for_short(
             end_clip.close()
         if 'final_video' in locals() and final_video is not None:
             final_video.close()
-
-if __name__ == "__main__":
-    output_dir = "output_test"
-    os.makedirs(output_dir, exist_ok=True)
-    input_video_file = "video.mp4"
-    output_video_file = os.path.join(output_dir, "short_gameplay_test.mp4")
-
-    clip_info_test = {
-        'title': 'Test de Composition Vidéo',
-        'broadcaster_name': 'AnymeRediffTwitch',
-        'game_name': 'Gameplay Test'  # Force la logique de "gameplay"
-    }
-
-    print("\n--- Démarrage du traitement de TEST pour un clip de jeu ---")
-    processed_file = trim_video_for_short(
-        input_path=input_video_file,
-        output_path=output_video_file,
-        clip_data=clip_info_test
-    )
-
-    if processed_file:
-        print(f"\n🎉 Test réussi ! Vidéo traitée et sauvegardée : {processed_file}")
-    else:
-        print("\n❌ Le test de traitement vidéo a échoué.")
