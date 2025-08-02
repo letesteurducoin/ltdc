@@ -168,6 +168,7 @@ def trim_video_for_short(
         stroke_color = "black"
         stroke_width = 1.5
         
+        title_clip = None
         try:
             title_clip = TextClip(title_text, fontsize=70, color=text_color,
                                     font=font_path_bold, stroke_color=stroke_color, stroke_width=stroke_width,
@@ -177,8 +178,8 @@ def trim_video_for_short(
                          .set_position(("center", int(target_height * 0.08)))
         except Exception as e:
             print(f"⚠️ Erreur lors de la création du titre : {e}. Le titre ne sera pas ajouté.")
-            title_clip = None
 
+        streamer_clip = None
         stroke_width = 0.5
         try:
             streamer_clip = TextClip(f"@{streamer_name}", fontsize=40, color=text_color,
@@ -187,27 +188,25 @@ def trim_video_for_short(
                             .set_position(("center", int(target_height * 0.85) - 40))
         except Exception as e:
             print(f"⚠️ Erreur lors de la création du nom du streamer : {e}. Le nom ne sera pas ajouté.")
-            streamer_clip = None
 
         twitch_icon_clip = None
-        if os.path.exists(twitch_icon_path):
-            if title_clip: # Vérification si le titre a bien été créé
-                try:
-                    twitch_icon_clip = ImageClip(twitch_icon_path, duration=duration)
-                    twitch_icon_clip = moviepy_resize(twitch_icon_clip, width=80)
-                    
-                    icon_x = title_clip.pos[0] - twitch_icon_clip.w - 10
-                    icon_y = title_clip.pos[1] + (title_clip.h / 2) - (twitch_icon_clip.h / 2)
+        if os.path.exists(twitch_icon_path) and title_clip:
+            try:
+                twitch_icon_clip = ImageClip(twitch_icon_path, duration=duration)
+                twitch_icon_clip = moviepy_resize(twitch_icon_clip, width=80)
+                
+                icon_x = title_clip.pos[0] - twitch_icon_clip.w - 10
+                icon_y = title_clip.pos[1] + (title_clip.h / 2) - (twitch_icon_clip.h / 2)
 
-                    twitch_icon_clip = twitch_icon_clip.set_position((icon_x, icon_y))
-                    print("✅ Icône Twitch ajoutée.")
-                except Exception as e:
-                    print(f"⚠️ Erreur lors du chargement ou du traitement de l'icône Twitch : {e}. L'icône ne sera pas ajoutée.")
-                    twitch_icon_clip = None
-            else:
-                print("⚠️ Le titre n'a pas pu être créé, l'icône Twitch ne sera pas ajoutée pour éviter les erreurs de positionnement.")
+                twitch_icon_clip = twitch_icon_clip.set_position((icon_x, icon_y))
+                print("✅ Icône Twitch ajoutée.")
+            except Exception as e:
+                print(f"⚠️ Erreur lors du chargement ou du traitement de l'icône Twitch : {e}. L'icône ne sera pas ajoutée.")
         else:
-            print("⚠️ Fichier 'twitch_icon.png' non trouvé dans le dossier 'assets'. L'icône ne sera pas ajoutée.")
+            if not os.path.exists(twitch_icon_path):
+                print("⚠️ Fichier 'twitch_icon.png' non trouvé dans le dossier 'assets'. L'icône ne sera pas ajoutée.")
+            if not title_clip:
+                print("⚠️ Le titre n'a pas pu être créé, l'icône Twitch ne sera pas ajoutée pour éviter les erreurs de positionnement.")
 
         final_elements_main_video = [video_with_visuals]
         if title_clip:
