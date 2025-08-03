@@ -1,2 +1,5 @@
 moviepy>=1.0.3
-imageio[ffmpeg]  # pour s'assurer que MoviePy peut encoder avec FFmpeg
+numpy>=1.19.0
+Pillow>=8.0.0
+imageio>=2.9.0
+imageio-ffmpeg>=0.4.0
