@@ -1,5 +1,6 @@
 import sys
 import os
+
 from moviepy.editor import (
     VideoFileClip,
     CompositeVideoClip,
@@ -8,12 +9,17 @@ from moviepy.editor import (
     concatenate_videoclips,
     ColorClip
 )
+from moviepy.video.fx.resize import resize
+from moviepy.config import change_settings
+
+# 👇 Déclaration explicite du chemin vers ImageMagick
+change_settings({"IMAGEMAGICK_BINARY": "/usr/bin/convert"})  # Ou /usr/local/bin/convert si besoin
 
 # ------------------------------
 # Configuration globale
 # ------------------------------
 RESOLUTION = (1080, 1920)
-MAX_DURATION = 60  # secondes
+MAX_DURATION = 180  # secondes
 WEBCAM_COORDS = {'x1': 5, 'y1': 8, 'x2': 542, 'y2': 282}
 ASSETS_DIR = "assets"
 OUTPUT_FILE = "output.mp4"
