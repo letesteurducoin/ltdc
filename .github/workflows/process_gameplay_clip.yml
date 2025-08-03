@@ -1,7 +1,7 @@
 name: Génération de clip vertical
 
 on:
-  workflow_dispatch:  # déclenché manuellement depuis GitHub
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,24 +11,35 @@ jobs:
       - name: 🧾 Checkout du repo
         uses: actions/checkout@v3
 
-      - name: 🐍 Installation de Python
+      - name: 🐍 Setup Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: 🧱 Installation des dépendances
+      - name: 🧱 Installer les dépendances
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 🎞️ Installation de FFmpeg
+      - name: 🎞️ Installer FFmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: 🚀 Exécution du script de traitement vidéo
+      - name: ✅ Vérifier la présence de la vidéo source
         run: |
-          python process_gameplay_clip.py
+          if [ ! -f video.mp4 ]; then
+            echo "❌ Erreur : video.mp4 introuvable à la racine du repo."
+            exit 1
+          fi
 
-      - name: 📦 Upload du fichier final
+      - name: 🚀 Exécuter le script
+        run: |
+          python process_gameplay_clip.py \
+            video.mp4 \
+            "Test de montage de clip" \
+            "Anyme023" \
+            "Valorant"
+
+      - name: 📦 Upload de l'artefact
         uses: actions/upload-artifact@v4
         with:
           name: short_video
