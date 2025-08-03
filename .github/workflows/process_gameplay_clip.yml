@@ -1,53 +1,35 @@
-name: Process Gameplay Clip Test
+name: Génération de clip vertical
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # déclenché manuellement depuis GitHub
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: 🧾 Checkout du repo
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
+      - name: 🐍 Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Install system dependencies (ffmpeg, ImageMagick)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ffmpeg imagemagick
+      - name: 🧱 Installation des dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Configure ImageMagick policy
-      run: |
-        POLICY_FILE="/etc/ImageMagick-6/policy.xml"
-        
-        sudo cp "$POLICY_FILE" "${POLICY_FILE}.bak"
-        
-        sudo sed -i 's#<policy domain="\([^"]*\)" rights="none" pattern="\([^"]*\)"\/>#<policy domain="\1" rights="read|write" pattern="\2"\/>#g' "$POLICY_FILE"
-        
-        sudo sed -i '/<policy domain="coder" rights="none" pattern="[^"]*"\/>/d' "$POLICY_FILE"
-        
-        echo "ImageMagick policy updated."
+      - name: 🎞️ Installation de FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: 🚀 Exécution du script de traitement vidéo
+        run: |
+          python process_gameplay_clip.py
 
-    - name: Debug Check script file and permission
-      run: |
-        ls -l process_gameplay_clip.py
-        echo "Starting the Python script..."
-      
-    - name: Run video processing script
-      run: python process_gameplay_clip.py 2>&1
-      
-    - name: Upload video artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: processed-gameplay-short
-        path: output_test/short_gameplay_test.mp
+      - name: 📦 Upload du fichier final
+        uses: actions/upload-artifact@v4
+        with:
+          name: short_video
+          path: output.mp4
